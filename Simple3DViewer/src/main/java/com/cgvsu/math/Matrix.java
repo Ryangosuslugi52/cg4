@@ -5,7 +5,9 @@ public class Matrix {
 
     public Matrix() {
         for (int i = 0; i < 4; i++) {
-            elements[i][i] = 1.0f;
+            for (int j = 0; j < 4; j++) {
+                elements[i][j] = (i == j) ? 1.0f : 0.0f;
+            }
         }
     }
 

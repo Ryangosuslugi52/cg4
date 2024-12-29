@@ -1,7 +1,8 @@
 package com.cgvsu.math;
 
+import static com.cgvsu.math.EPS.EPS;
+
 public class Vector3f {
-    public static final float EPSILON = 1e-7f;
     public float x, y, z;
 
     public Vector3f(float x, float y, float z) {
@@ -11,8 +12,7 @@ public class Vector3f {
     }
 
     public boolean equals(Vector3f other) {
-        return Math.abs(this.x - other.x) < EPSILON &&
-                Math.abs(this.y - other.y) < EPSILON && Math.abs(this.z - other.z) < EPSILON;
+        return Math.abs(this.x - other.x) < EPS && Math.abs(this.y - other.y) < EPS && Math.abs(this.z - other.z) < EPS;
     }
 
     public void mul(Vector3f var1, Vector3f var2) {
@@ -48,20 +48,23 @@ public class Vector3f {
     }
 
     public Vector3f transform(Matrix matrix) {
-        float[] result = new float[3];
-        for (int i = 0; i < 3; i++) {
-            result[i] = x * matrix.elements[i][0] +
-                    y * matrix.elements[i][1] +
-                    z * matrix.elements[i][2] +
-                    matrix.elements[i][3];
+        float[] result = new float[4];
+        float[] vector = {x, y, z, 1};
+        for (int i = 0; i < 4; i++) {
+            result[i] = 0;
+            for (int j = 0; j < 4; j++) {
+                result[i] += matrix.elements[i][j] * vector[j];
+            }
         }
         return new Vector3f(result[0], result[1], result[2]);
     }
 
     public void normalize() {
         float length = length();
-        if (length > EPSILON) {
-            this.div(length);
+        if (length > EPS) {
+            x /= length;
+            y /= length;
+            z /= length;
         } else {
             throw new ArithmeticException("Cannot normalize a zero vector");
         }

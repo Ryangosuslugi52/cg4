@@ -16,7 +16,8 @@ public class Vector4f {
     }
 
     public boolean equals(Vector4f other) {
-        return Math.abs(x - other.x) < EPS && Math.abs(y - other.y) < EPS && Math.abs(z - other.z) < EPS && Math.abs(w - other.w) < EPS;
+        return Math.abs(x - other.x) < EPS && Math.abs(y - other.y) < EPS &&
+                Math.abs(z - other.z) < EPS && Math.abs(w - other.w) < EPS;
     }
 
     public Vector4f add(Vector4f other) {
@@ -61,12 +62,18 @@ public class Vector4f {
     public Vector4f transform(Matrix matrix) {
         float[] result = new float[4];
         for (int i = 0; i < 4; i++) {
-            result[i] = x * matrix.elements[i][0] +
-                    y * matrix.elements[i][1] +
-                    z * matrix.elements[i][2] +
-                    w * matrix.elements[i][3];
+            result[i] = x * matrix.elements[i][0] + y * matrix.elements[i][1] +
+                    z * matrix.elements[i][2] + w * matrix.elements[i][3];
         }
         return new Vector4f(result[0], result[1], result[2], result[3]);
+    }
+
+    public Vector4f scale(float scalar) {
+        return new Vector4f(x * scalar, y * scalar, z * scalar, w * scalar);
+    }
+
+    public Vector3f toVector3f() {
+        return new Vector3f(x / w, y / w, z / w);
     }
 
     @Override
