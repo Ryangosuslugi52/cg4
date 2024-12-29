@@ -1,6 +1,5 @@
 package com.cgvsu.math;
 
-// Это заготовка для собственной библиотеки для работы с линейной алгеброй
 public class Vector2f {
     private float x;
     private float y;
@@ -11,7 +10,7 @@ public class Vector2f {
     }
 
     public float getX() {
-        return x;
+        return this.x;
     }
 
     public void setX(float x) {
@@ -19,7 +18,7 @@ public class Vector2f {
     }
 
     public float getY() {
-        return y;
+        return this.y;
     }
 
     public void setY(float y) {
