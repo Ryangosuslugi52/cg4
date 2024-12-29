@@ -13,10 +13,15 @@ public class ZBuffer {
     }
 
     public boolean isCloser(int x, int y, double depth) {
-        return depth < buffer[x][y];
+        if (x < 0 || x >= buffer.length ||  y < 0 || y >= buffer[0].length) {
+            return false; // Если координаты выходят за пределы, то возвращаем false
+        }
+        return depth < buffer[x][y]; // Проверяем, если глубина текущего пикселя меньше, чем глубина в буфере
     }
 
     public void setDepth(int x, int y, double depth) {
-        buffer[x][y] = depth;
+        if (x >= 0 && x < buffer.length && y >= 0 && y < buffer[0].length) {
+            buffer[x][y] = depth;
+        }
     }
 }
