@@ -1,11 +1,19 @@
 package com.cgvsu.render_engine;
 
+import com.cgvsu.math.Vector3f;
+import com.cgvsu.model.Model;
+import com.cgvsu.normalize.NormalCalculator;
+import com.cgvsu.rasterization.Rasterization;
+import com.cgvsu.rasterization.ZBuffer;
+import com.cgvsu.triangulation.Triangulation;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.paint.Color;
+
+import javax.vecmath.Matrix4f;
+import javax.vecmath.Point2f;
 import java.util.ArrayList;
 
-import com.cgvsu.math.Vector3f;
-import javafx.scene.canvas.GraphicsContext;
-import javax.vecmath.*;
-import com.cgvsu.model.Model;
 import static com.cgvsu.render_engine.GraphicConveyor.*;
 
 public class RenderEngine {
@@ -17,6 +25,8 @@ public class RenderEngine {
             final int width,
             final int height)
     {
+        mesh.polygons = Triangulation.triangulateModel(mesh.polygons,mesh.vertices);  // Триангуляция
+        NormalCalculator.calculateNormals(mesh);  // Пересчет нормалей модели
         Matrix4f modelMatrix = rotateScaleTranslate();
         Matrix4f viewMatrix = camera.getViewMatrix();
         Matrix4f projectionMatrix = camera.getProjectionMatrix();
@@ -25,34 +35,25 @@ public class RenderEngine {
         modelViewProjectionMatrix.mul(viewMatrix);
         modelViewProjectionMatrix.mul(projectionMatrix);
 
-        final int nPolygons = mesh.polygons.size();
-        for (int polygonInd = 0; polygonInd < nPolygons; ++polygonInd) {
-            final int nVerticesInPolygon = mesh.polygons.get(polygonInd).getVertexIndices().size();
+        ZBuffer zBuffer = new ZBuffer(width, height);  // Создаем Z-буфер
+        PixelWriter pixelWriter = graphicsContext.getPixelWriter();
 
-            ArrayList<Point2f> resultPoints = new ArrayList<>();
-            for (int vertexInPolygonInd = 0; vertexInPolygonInd < nVerticesInPolygon; ++vertexInPolygonInd) {
-                Vector3f vertex = mesh.vertices.get(mesh.polygons.get(polygonInd).getVertexIndices().get(vertexInPolygonInd));
+        ArrayList<double[]> vertices = new ArrayList<>();
+        ArrayList<Color> vertexColors = new ArrayList<>();
 
-                javax.vecmath.Vector3f vertexVecmath = new javax.vecmath.Vector3f(vertex.x, vertex.y, vertex.z);
+        // Преобразуем вершины модели и сохраняем их координаты
+        for (Vector3f vertex : mesh.vertices) {
+            javax.vecmath.Vector3f vertexVecmath = new javax.vecmath.Vector3f(vertex.x, vertex.y, vertex.z);
+            javax.vecmath.Vector3f transformedVertex = multiplyMatrix4ByVector3(modelViewProjectionMatrix, vertexVecmath);
 
-                Point2f resultPoint = vertexToPoint(multiplyMatrix4ByVector3(modelViewProjectionMatrix, vertexVecmath), width, height);
-                resultPoints.add(resultPoint);
-            }
+            Point2f point = vertexToPoint(transformedVertex, width, height);
+            vertices.add(new double[]{point.x, point.y, transformedVertex.z});
 
-            for (int vertexInPolygonInd = 1; vertexInPolygonInd < nVerticesInPolygon; ++vertexInPolygonInd) {
-                graphicsContext.strokeLine(
-                        resultPoints.get(vertexInPolygonInd - 1).x,
-                        resultPoints.get(vertexInPolygonInd - 1).y,
-                        resultPoints.get(vertexInPolygonInd).x,
-                        resultPoints.get(vertexInPolygonInd).y);
-            }
-
-            if (nVerticesInPolygon > 0)
-                graphicsContext.strokeLine(
-                        resultPoints.get(nVerticesInPolygon - 1).x,
-                        resultPoints.get(nVerticesInPolygon - 1).y,
-                        resultPoints.get(0).x,
-                        resultPoints.get(0).y);
+            // Устанавливаем цвет вершины (красный, как указано в твоем запросе)
+            vertexColors.add(Color.RED);
         }
+
+        // Растеризация полигонов
+        Rasterization.renderPolygons(graphicsContext, mesh.polygons, vertices.toArray(new double[0][]), vertexColors.toArray(new Color[0]), zBuffer);
     }
 }

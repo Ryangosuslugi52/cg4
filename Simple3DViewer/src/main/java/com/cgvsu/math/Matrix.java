@@ -3,14 +3,12 @@ package com.cgvsu.math;
 public class Matrix {
     public float[][] elements = new float[4][4];
 
-    // Конструктор для единичной матрицы
     public Matrix() {
         for (int i = 0; i < 4; i++) {
-            elements[i][i] = 1.0f; // Единичная матрица
+            elements[i][i] = 1.0f;
         }
     }
 
-    // Матрица переноса
     public static Matrix translation(float tx, float ty, float tz) {
         Matrix result = new Matrix();
         result.elements[0][3] = tx;
@@ -19,7 +17,6 @@ public class Matrix {
         return result;
     }
 
-    // Матрица масштабирования
     public static Matrix scaling(float sx, float sy, float sz) {
         Matrix result = new Matrix();
         result.elements[0][0] = sx;
@@ -28,7 +25,6 @@ public class Matrix {
         return result;
     }
 
-    // Матрица поворота вокруг оси X
     public static Matrix rotationX(float angle) {
         Matrix result = new Matrix();
         float cos = (float) Math.cos(angle);
@@ -40,7 +36,6 @@ public class Matrix {
         return result;
     }
 
-    // Матрица поворота вокруг оси Y
     public static Matrix rotationY(float angle) {
         Matrix result = new Matrix();
         float cos = (float) Math.cos(angle);
@@ -52,7 +47,6 @@ public class Matrix {
         return result;
     }
 
-    // Матрица поворота вокруг оси Z
     public static Matrix rotationZ(float angle) {
         Matrix result = new Matrix();
         float cos = (float) Math.cos(angle);
@@ -64,7 +58,6 @@ public class Matrix {
         return result;
     }
 
-    // Умножение матрицы на другую матрицу
     public Matrix multiply(Matrix other) {
         Matrix result = new Matrix();
         for (int i = 0; i < 4; i++) {
@@ -78,17 +71,13 @@ public class Matrix {
         return result;
     }
 
-    // Преобразование матрицы в строку (для отладки)
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
+    public Matrix transpose() {
+        Matrix result = new Matrix();
         for (int i = 0; i < 4; i++) {
-            sb.append("[");
             for (int j = 0; j < 4; j++) {
-                sb.append(String.format("%6.2f ", elements[i][j]));
+                result.elements[i][j] = this.elements[j][i];
             }
-            sb.append("]\n");
         }
-        return sb.toString();
+        return result;
     }
 }

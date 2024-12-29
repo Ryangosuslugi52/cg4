@@ -32,23 +32,25 @@ public class Rasterization {
                 colors[i] = vertexColors[vertexIndex];
             }
 
-            drawTriangle(pixelWriter, arrX, arrY, arrZ, colors, zBuffer);
-        }
-    }
+            // Вычисление ограничивающего прямоугольника
+            int minX = (int) Math.min(Math.min(arrX[0], arrX[1]), arrX[2]);
+            int maxX = (int) Math.max(Math.max(arrX[0], arrX[1]), arrX[2]);
+            int minY = (int) Math.min(Math.min(arrY[0], arrY[1]), arrY[2]);
+            int maxY = (int) Math.max(Math.max(arrY[0], arrY[1]), arrY[2]);
 
-    private static void drawTriangle(
-            PixelWriter pixelWriter,
-            int[] arrX, int[] arrY, double[] arrZ,
-            Color[] colors,
-            ZBuffer zBuffer) {
+            // Ограничиваем растеризацию в пределах экрана
+            minX = Math.max(0, minX);
+            maxX = Math.min((int) graphicsContext.getCanvas().getWidth(), maxX);
+            minY = Math.max(0, minY);
+            maxY = Math.min((int) graphicsContext.getCanvas().getHeight(), maxY);
 
-        sortVertices(arrX, arrY, arrZ, colors);
-
-        for (int y = arrY[0]; y <= arrY[2]; y++) {
-            if (y < arrY[1]) {
-                fillScanline(pixelWriter, arrX, arrY, arrZ, colors, zBuffer, y, 0, 1);
-            } else {
-                fillScanline(pixelWriter, arrX, arrY, arrZ, colors, zBuffer, y, 1, 2);
+            // Отрисовка треугольника внутри ограничивающего прямоугольника
+            for (int y = minY; y <= maxY; y++) {
+                if (y < arrY[1]) {
+                    fillScanline(pixelWriter, arrX, arrY, arrZ, colors, zBuffer, y, 0, 1);
+                } else {
+                    fillScanline(pixelWriter, arrX, arrY, arrZ, colors, zBuffer, y, 1, 2);
+                }
             }
         }
     }
@@ -84,10 +86,12 @@ public class Rasterization {
     }
 
     private static int interpolateX(int[] arrX, int[] arrY, int i, int y) {
+        if (arrY[2] == arrY[i]) return arrX[i];  // Защита от деления на 0
         return arrX[i] + (y - arrY[i]) * (arrX[2] - arrX[i]) / (arrY[2] - arrY[i]);
     }
 
     private static double interpolateZ(int[] arrX, int[] arrY, double[] arrZ, int i, int y) {
+        if (arrY[2] == arrY[i]) return arrZ[i];  // Защита от деления на 0
         return arrZ[i] + (y - arrY[i]) * (arrZ[2] - arrZ[i]) / (arrY[2] - arrY[i]);
     }
 
@@ -95,7 +99,6 @@ public class Rasterization {
         double t = (double) (y - arrY[i]) / (arrY[2] - arrY[i]);
         return colors[i].interpolate(colors[2], t);
     }
-
     private static double interpolate(int x1, int x2, double v1, double v2, int x) {
         return v1 + (x - x1) * (v2 - v1) / (x2 - x1);
     }
@@ -103,21 +106,5 @@ public class Rasterization {
     private static Color interpolateColor(int x1, int x2, Color c1, Color c2, int x) {
         double t = (double) (x - x1) / (x2 - x1);
         return c1.interpolate(c2, t);
-    }
-
-    private static void sortVertices(int[] x, int[] y, double[] z, Color[] c) {
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < 2 - i; j++) {
-                if (y[j] > y[j + 1]) {
-                    swap(x, y, z, c, j, j + 1);
-                }
-            }
-        }
-    }
-    private static void swap(int[] x, int[] y, double[] z, Color[] c, int i, int j) {
-        int tempY = y[i]; y[i] = y[j]; y[j] = tempY;
-        int tempX = x[i]; x[i] = x[j]; x[j] = tempX;
-        double tempZ = z[i]; z[i] = z[j]; z[j] = tempZ;
-        Color tempC = c[i]; c[i] = c[j]; c[j] = tempC;
     }
 }
