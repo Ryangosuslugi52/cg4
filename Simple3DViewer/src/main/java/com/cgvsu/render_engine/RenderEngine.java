@@ -25,8 +25,8 @@ public class RenderEngine {
             final int width,
             final int height)
     {
-        mesh.polygons = Triangulation.triangulateModel(mesh.polygons,mesh.vertices);  // Триангуляция
-        NormalCalculator.calculateNormals(mesh);  // Пересчет нормалей модели
+        mesh.polygons = Triangulation.triangulateModel(mesh.polygons,mesh.vertices);
+        NormalCalculator.calculateNormals(mesh);
         Matrix4f modelMatrix = rotateScaleTranslate();
         Matrix4f viewMatrix = camera.getViewMatrix();
         Matrix4f projectionMatrix = camera.getProjectionMatrix();
@@ -35,13 +35,12 @@ public class RenderEngine {
         modelViewProjectionMatrix.mul(viewMatrix);
         modelViewProjectionMatrix.mul(projectionMatrix);
 
-        ZBuffer zBuffer = new ZBuffer(width, height);  // Создаем Z-буфер
+        ZBuffer zBuffer = new ZBuffer(width, height);
         PixelWriter pixelWriter = graphicsContext.getPixelWriter();
 
         ArrayList<double[]> vertices = new ArrayList<>();
         ArrayList<Color> vertexColors = new ArrayList<>();
 
-        // Преобразуем вершины модели и сохраняем их координаты
         for (Vector3f vertex : mesh.vertices) {
             javax.vecmath.Vector3f vertexVecmath = new javax.vecmath.Vector3f(vertex.x, vertex.y, vertex.z);
             javax.vecmath.Vector3f transformedVertex = multiplyMatrix4ByVector3(modelViewProjectionMatrix, vertexVecmath);
@@ -49,11 +48,9 @@ public class RenderEngine {
             Point2f point = vertexToPoint(transformedVertex, width, height);
             vertices.add(new double[]{point.x, point.y, transformedVertex.z});
 
-            // Устанавливаем цвет вершины (красный, как указано в твоем запросе)
             vertexColors.add(Color.RED);
         }
 
-        // Растеризация полигонов
         Rasterization.renderPolygons(graphicsContext, mesh.polygons, vertices.toArray(new double[0][]), vertexColors.toArray(new Color[0]), zBuffer);
     }
 }

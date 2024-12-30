@@ -5,7 +5,7 @@ public class AffineTransformations {
     private Matrix transformationMatrix;
 
     public AffineTransformations() {
-        transformationMatrix = new Matrix(); // Единичная матрица
+        transformationMatrix = new Matrix();
     }
 
     public void translate(float tx, float ty, float tz) {

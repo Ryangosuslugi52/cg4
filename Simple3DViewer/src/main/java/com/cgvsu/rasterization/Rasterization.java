@@ -32,19 +32,16 @@ public class Rasterization {
                 colors[i] = vertexColors[vertexIndex];
             }
 
-            // Вычисление ограничивающего прямоугольника
             int minX = (int) Math.min(Math.min(arrX[0], arrX[1]), arrX[2]);
             int maxX = (int) Math.max(Math.max(arrX[0], arrX[1]), arrX[2]);
             int minY = (int) Math.min(Math.min(arrY[0], arrY[1]), arrY[2]);
             int maxY = (int) Math.max(Math.max(arrY[0], arrY[1]), arrY[2]);
 
-            // Ограничиваем растеризацию в пределах экрана
             minX = Math.max(0, minX);
             maxX = Math.min((int) graphicsContext.getCanvas().getWidth(), maxX);
             minY = Math.max(0, minY);
             maxY = Math.min((int) graphicsContext.getCanvas().getHeight(), maxY);
 
-            // Отрисовка треугольника внутри ограничивающего прямоугольника
             for (int y = minY; y <= maxY; y++) {
                 if (y < arrY[1]) {
                     fillScanline(pixelWriter, arrX, arrY, arrZ, colors, zBuffer, y, 0, 1);

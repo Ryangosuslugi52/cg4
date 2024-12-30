@@ -11,8 +11,40 @@ public class Vector3f {
         this.z = z;
     }
 
+    public float getX() {
+        return x;
+    }
+
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public void setY(float y) {
+        this.y = y;
+    }
+
+    public float getZ() {
+        return z;
+    }
+
+    public void setZ(float z) {
+        this.z = z;
+    }
+
     public boolean equals(Vector3f other) {
         return Math.abs(this.x - other.x) < EPS && Math.abs(this.y - other.y) < EPS && Math.abs(this.z - other.z) < EPS;
+    }
+
+    public Vector3f add(Vector3f other) {
+        return new Vector3f(this.x + other.x, this.y + other.y, this.z + other.z);
+    }
+
+    public Vector3f subtract(Vector3f other) {
+        return new Vector3f(this.x - other.x, this.y - other.y, this.z - other.z);
     }
 
     public void mul(Vector3f var1, Vector3f var2) {
@@ -21,19 +53,7 @@ public class Vector3f {
         this.z = var1.x * var2.y - var1.y * var2.x;
     }
 
-    public void sub(Vector3f var1, Vector3f var2) {
-        this.x = var2.x - var1.x;
-        this.y = var2.y - var1.y;
-        this.z = var2.z - var1.z;
-    }
-
-    public void add(Vector3f var1) {
-        this.x += var1.x;
-        this.y += var1.y;
-        this.z += var1.z;
-    }
-
-    public void div(float n) {
+    public void divide(float n) {
         if (n == 0) {
             throw new ArithmeticException("Cannot divide by zero");
         } else {
@@ -41,6 +61,14 @@ public class Vector3f {
             this.y /= n;
             this.z /= n;
         }
+    }
+
+    public Vector3f scalar(float scalar) {
+        return new Vector3f(this.x * scalar, this.y * scalar, this.z * scalar);
+    }
+
+    public Vector4f toColumnVector() {
+        return new Vector4f(this.x, this.y, this.z, 1.0f);
     }
 
     public float dot(Vector3f other) {
@@ -59,15 +87,20 @@ public class Vector3f {
         return new Vector3f(result[0], result[1], result[2]);
     }
 
-    public void normalize() {
+    public Vector3f normalize() {
         float length = length();
-        if (length > EPS) {
-            x /= length;
-            y /= length;
-            z /= length;
-        } else {
-            throw new ArithmeticException("Cannot normalize a zero vector");
+        if (length == 0) {
+            throw new ArithmeticException("Cannot normalize a zero-length vector");
         }
+        return new Vector3f(this.x / length, this.y / length, this.z / length);
+    }
+
+    public Vector3f cross(Vector3f other) {
+        return new Vector3f(
+                this.y * other.z - this.z * other.y,
+                this.z * other.x - this.x * other.z,
+                this.x * other.y - this.y * other.x
+        );
     }
 
     public float length() {

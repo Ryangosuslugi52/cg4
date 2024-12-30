@@ -64,22 +64,30 @@ public class Matrix {
         Matrix result = new Matrix();
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                result.elements[i][j] = 0;
                 for (int k = 0; k < 4; k++) {
-                    result.elements[i][j] += this.elements[i][k] * other.elements[k][j];
+                    result.elements[i][j] += this.elements[k][i] * other.elements[j][k];
                 }
             }
         }
         return result;
     }
 
+    public Vector4f multiply(Vector4f vec) {
+        return new Vector4f(
+                elements[0][0] * vec.x + elements[1][0] * vec.y + elements[2][0] * vec.z + elements[3][0] * vec.w,
+                elements[0][1] * vec.x + elements[1][1] * vec.y + elements[2][1] * vec.z + elements[3][1] * vec.w,
+                elements[0][2] * vec.x + elements[1][2] * vec.y + elements[2][2] * vec.z + elements[3][2] * vec.w,
+                elements[3][3]
+        );
+    }
+
     public Matrix transpose() {
-        Matrix result = new Matrix();
+        Matrix transposedMatrix = new Matrix();
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                result.elements[i][j] = this.elements[j][i];
+                transposedMatrix.elements[j][i] = this.elements[i][j];
             }
         }
-        return result;
+        return transposedMatrix;
     }
 }

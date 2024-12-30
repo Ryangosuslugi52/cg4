@@ -7,16 +7,16 @@ public class ZBuffer {
         buffer = new double[width][height];
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                buffer[x][y] = Double.POSITIVE_INFINITY; // Инициализация бесконечным значением
+                buffer[x][y] = Double.POSITIVE_INFINITY;
             }
         }
     }
 
     public boolean isCloser(int x, int y, double depth) {
         if (x < 0 || x >= buffer.length ||  y < 0 || y >= buffer[0].length) {
-            return false; // Если координаты выходят за пределы, то возвращаем false
+            return false;
         }
-        return depth < buffer[x][y]; // Проверяем, если глубина текущего пикселя меньше, чем глубина в буфере
+        return depth < buffer[x][y];
     }
 
     public void setDepth(int x, int y, double depth) {

@@ -68,7 +68,7 @@ public class Vector4f {
         return new Vector4f(result[0], result[1], result[2], result[3]);
     }
 
-    public Vector4f scale(float scalar) {
+    public Vector4f scalar(float scalar) {
         return new Vector4f(x * scalar, y * scalar, z * scalar, w * scalar);
     }
 

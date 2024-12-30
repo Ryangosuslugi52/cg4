@@ -1,13 +1,14 @@
 package com.cgvsu.model;
 
 import com.cgvsu.math.Matrix;
+import com.cgvsu.math.Vector3f;
 
 public class TranslationModel {
 
     private Matrix transformationMatrix;
 
     public TranslationModel() {
-        transformationMatrix = new Matrix(); // Единичная матрица
+        transformationMatrix = new Matrix();
     }
 
     public void translate(float tx, float ty, float tz) {
@@ -45,7 +46,12 @@ public class TranslationModel {
         return transformationMatrix;
     }
 
+    public Vector3f applyToVector(Vector3f vector) {
+        return vector.transform(transformationMatrix);
+    }
+
     public void resetTransformations() {
         transformationMatrix = new Matrix(); // Сброс к единичной матрице
     }
 }
+
