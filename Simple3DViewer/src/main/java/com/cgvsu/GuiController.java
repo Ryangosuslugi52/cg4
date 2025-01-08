@@ -16,7 +16,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import javafx.scene.input.ScrollEvent;
 
 import javax.vecmath.AxisAngle4f;
 import javax.vecmath.Vector3f;
@@ -34,8 +33,9 @@ public class GuiController {
     @FXML
     private Canvas canvas;
 
+
     @FXML
-    private Button textureButton; // Поле для Button
+    private Button selectTextureButton; // Поле для кнопки выбора текстуры
 
     private Model mesh = null;
 
@@ -76,13 +76,28 @@ public class GuiController {
 
         setupMouseControls();
 
-        textureButton.setOnAction(event -> handleTextureButtonClick());
+        selectTextureButton.setOnAction(event -> handleSelectTextureButtonClick());
+
+    }
+    private void handleSelectTextureButtonClick() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg"));
+        fileChooser.setTitle("Выберите текстуру");
+
+        File file = fileChooser.showOpenDialog((Stage) canvas.getScene().getWindow());
+        if (file != null) {
+            String texturePath = file.getAbsolutePath();
+            // Предполагается, что у вас есть метод для установки текстуры модели
+            if (mesh != null) {
+                mesh.pathTexture = texturePath; // Установка пути к текстуре в модели
+                System.out.println("Текстура установлена: " + texturePath);
+            } else {
+                System.out.println("Модель не загружена.");
+            }
+        }
     }
 
-    private void handleTextureButtonClick() {
-        // Логика для наложения текстуры будет добавлена здесь
-        System.out.println("Кнопка наложения текстуры нажата");
-    }
+
 
     private void setupMouseControls() {
         canvas.setOnMousePressed(this::handleMousePress);

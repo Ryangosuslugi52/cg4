@@ -27,5 +27,6 @@
             onScroll="#handleScroll"/>
     <RadioButton fx:id="gridToggle" text="Сетка" layoutX="200" layoutY="5" />
 
-    <Button fx:id="textureButton" text="Наложить текстуру" layoutX="60" /> <!-- Новая кнопка -->
+    <Button fx:id="selectTextureButton" text="Выбрать текстуру" layoutX="60" />
+
 </AnchorPane>
