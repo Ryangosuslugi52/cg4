@@ -166,10 +166,8 @@ public class GuiController {
     }
 
 
-
-
     private void updateCameraNames() {
-        cameraComboBox.getItems().clear();
+        cameraComboBox.getItems().clear(); // Очищаем текущие элементы
         for (int i = 0; i < cameraManager.getCameras().size(); i++) {
             cameraComboBox.getItems().add(cameraManager.getCameras().get(i)); // Добавляем объект Camera
         }
@@ -187,14 +185,22 @@ public class GuiController {
             }
         });
 
-        cameraComboBox.getSelectionModel().select(cameraManager.getActiveCamera()); // Устанавливаем активную камеру по умолчанию
+        if (!cameraManager.getCameras().isEmpty()) {
+            cameraComboBox.getSelectionModel().select(cameraManager.getActiveCamera()); // Устанавливаем активную камеру по умолчанию
+        }
     }
 
 
+
     private void handleRemoveCamera() {
-        int currentIndex = cameraManager.getCameras().indexOf(cameraManager.getActiveCamera());
-        cameraManager.removeCamera(currentIndex);
-        System.out.println("Камера удалена. Текущая камера: " + cameraManager.getActiveCamera());
+        int selectedIndex = cameraComboBox.getSelectionModel().getSelectedIndex();
+        if (selectedIndex >= 0) {
+            cameraManager.removeCamera(selectedIndex); // Удаляем камеру из менеджера
+            updateCameraNames(); // Обновляем названия в ComboBox
+            System.out.println("Камера удалена: Camera " + (selectedIndex + 1));
+        } else {
+            showMessage("Ошибка", "Выберите камеру для удаления.", messageError);
+        }
     }
 
     private void handleSwitchCamera() {
