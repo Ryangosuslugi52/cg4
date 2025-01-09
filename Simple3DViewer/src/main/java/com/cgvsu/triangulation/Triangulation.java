@@ -20,7 +20,7 @@ public class Triangulation {
             for (int vertex = 1; vertex < nVertices - 1; vertex++) {
                 Polygon polygonResult = new Polygon();
 
-                ArrayList<Integer> vertexIndices = (ArrayList<Integer>) getVertexes(
+                ArrayList<Integer> vertexIndices =  getVertexes(
                         polygon.getVertexIndices(),
                         0,
                         vertex,
@@ -29,7 +29,7 @@ public class Triangulation {
                 polygonResult.setVertexIndices(vertexIndices);
 
                 if (!polygon.getTextureVertexIndices().isEmpty()) {
-                    ArrayList<Integer> textureVertexIndices = (ArrayList<Integer>) getVertexes(
+                    ArrayList<Integer> textureVertexIndices = getVertexes(
                             polygon.getTextureVertexIndices(),
                             0,
                             vertex,
@@ -39,7 +39,7 @@ public class Triangulation {
                 }
 
                 if (!polygon.getNormalIndices().isEmpty()) {
-                    ArrayList<Integer> normalIndices = (ArrayList<Integer>) getVertexes(
+                    ArrayList<Integer> normalIndices = getVertexes(
                             polygon.getNormalIndices(),
                             0,
                             vertex,
@@ -54,7 +54,7 @@ public class Triangulation {
         return result;
     }
 
-    public static List<Integer> getVertexes(List<Integer> vertexes, int v1, int v2, int v3) {
+    public static ArrayList<Integer> getVertexes(List<Integer> vertexes, int v1, int v2, int v3) {
         return new ArrayList<>(Arrays.asList(
                 vertexes.get(v1),
                 vertexes.get(v2),
