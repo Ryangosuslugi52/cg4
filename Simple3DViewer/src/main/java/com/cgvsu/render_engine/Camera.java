@@ -12,16 +12,9 @@ public class Camera {
     private float nearPlane;
     private float farPlane;
     private boolean isActive;
+    private int cameraIndex;
 
-    public Camera(
-            final Vector3f position,
-            final Vector3f target,
-            final float fov,
-            final float aspectRatio,
-            final float nearPlane,
-            final float farPlane,
-            final boolean isActive
-    ) {
+    public Camera(Vector3f position, Vector3f target, float fov, float aspectRatio, float nearPlane, float farPlane, boolean isActive, int index) {
         this.position = position;
         this.target = target;
         this.fov = fov;
@@ -29,6 +22,7 @@ public class Camera {
         this.nearPlane = nearPlane;
         this.farPlane = farPlane;
         this.isActive = isActive;
+        this.cameraIndex = index; // Сохраняем индекс камеры
     }
 
     public void setPosition(final Vector3f position) {
@@ -69,5 +63,9 @@ public class Camera {
 
     public void setTarget(Vector3f target) {
         this.target = target;
+    }
+    @Override
+    public String toString() {
+        return "Camera " + cameraIndex; // Возвращаем название камеры с индексом
     }
 }

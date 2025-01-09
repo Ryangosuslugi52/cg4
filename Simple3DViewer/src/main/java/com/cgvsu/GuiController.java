@@ -1,5 +1,6 @@
 package com.cgvsu;
 
+import com.cgvsu.render_engine.CameraManager;
 import com.cgvsu.render_engine.RenderEngine;
 import com.cgvsu.render_engine.Camera;
 import com.cgvsu.model.Model;
@@ -11,6 +12,7 @@ import javafx.animation.Timeline;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -38,10 +40,34 @@ public class GuiController {
 
     @FXML
     private Button selectTextureButton;
+    @FXML
+    private Button addCameraButton; // Кнопка для добавления камеры
+    @FXML
+    private Button removeCameraButton; // Кнопка для удаления камеры
+    @FXML
+    private Button switchCameraButton; // Кнопка для переключения камеры
+    @FXML
+    private TextField cameraPosX;
+    @FXML
+    private TextField cameraPosY;
+    @FXML
+    private TextField cameraPosZ;
+    @FXML
+    private TextField cameraTargetX;
+    @FXML
+    private TextField cameraTargetY;
+    @FXML
+    private TextField cameraTargetZ;
+
+    @FXML
+    private ComboBox<Camera> cameraComboBox;
+
+    private int cameraCount = 0; // Счетчик для камер
 
     private final Scene scene = new Scene();
 
     private Model mesh = null;
+    private CameraManager cameraManager; // Менеджер камер
 
     public TextField sx;
     public TextField sy;
@@ -56,12 +82,6 @@ public class GuiController {
 
     Alert messageError = new Alert(Alert.AlertType.ERROR);
 
-    private Camera camera = new Camera(
-            new Vector3f(0, 0, 100),
-            new Vector3f(0, 0, 0),
-            1.0F, 1, 0.01F, 100,
-            true);
-
     private Timeline timeline;
     private boolean isMousePressedForModel = false;
     private double lastMouseXForModel, lastMouseYForModel;
@@ -70,21 +90,32 @@ public class GuiController {
 
     @FXML
     private void initialize() {
+        cameraManager = new CameraManager();
+        cameraManager.addCamera(new Camera(new Vector3f(0, 0, 100),
+                new Vector3f(0, 0, 0),
+                1.0F, 1, 0.01F, 100, true,1));
+        updateCameraComboBox();
+
+        switchCameraButton.setOnAction(event -> handleSwitchCamera());
         anchorPane.prefWidthProperty().addListener((ov, oldValue, newValue) -> canvas.setWidth(newValue.doubleValue()));
         anchorPane.prefHeightProperty().addListener((ov, oldValue, newValue) -> canvas.setHeight(newValue.doubleValue()));
 
         timeline = new Timeline();
         timeline.setCycleCount(Animation.INDEFINITE);
 
+        addCameraButton.setOnAction(event -> handleAddCamera());
+        removeCameraButton.setOnAction(event -> handleRemoveCamera());
+        switchCameraButton.setOnAction(event -> handleSwitchCamera());
+
         KeyFrame frame = new KeyFrame(Duration.millis(15), event -> {
             double width = canvas.getWidth();
             double height = canvas.getHeight();
 
             canvas.getGraphicsContext2D().clearRect(0, 0, width, height);
-            camera.setAspectRatio((float) (width / height));
+            cameraManager.getActiveCamera().setAspectRatio((float) (width / height));
 
             if (mesh != null) {
-                RenderEngine.render(canvas.getGraphicsContext2D(), camera, mesh, (int) width, (int) height);
+                RenderEngine.render(canvas.getGraphicsContext2D(), cameraManager, mesh, (int) width, (int) height);
             }
         });
 
@@ -99,6 +130,83 @@ public class GuiController {
         selectTextureButton.setOnAction(event -> handleSelectTextureButtonClick());
 
     }
+    private void updateCameraComboBox() {
+        cameraComboBox.getItems().clear();
+        cameraComboBox.getItems().addAll(cameraManager.getCameras());
+        cameraComboBox.getSelectionModel().select(cameraManager.getActiveCamera()); // Устанавливаем активную камеру по умолчанию
+    }
+
+
+    private void handleAddCamera() {
+        try {
+            float posX = Float.parseFloat(cameraPosX.getText());
+            float posY = Float.parseFloat(cameraPosY.getText());
+            float posZ = Float.parseFloat(cameraPosZ.getText());
+            float targetX = Float.parseFloat(cameraTargetX.getText());
+            float targetY = Float.parseFloat(cameraTargetY.getText());
+            float targetZ = Float.parseFloat(cameraTargetZ.getText());
+
+            Camera newCamera = new Camera(
+                    new Vector3f(posX, posY, posZ),
+                    new Vector3f(targetX, targetY, targetZ),
+                    1.0F,
+                    (float) ((float) canvas.getWidth() / canvas.getHeight()),
+                    0.01F,
+                    100F,
+                    true,
+                    ++cameraCount); // Увеличиваем счетчик и передаем его
+
+            cameraManager.addCamera(newCamera);
+            updateCameraNames(); // Обновляем ComboBox с названиями камер
+
+            System.out.println("Камера добавлена: " + newCamera);
+        } catch (NumberFormatException e) {
+            showMessage("Ошибка", "Введите корректные числовые значения для позиции и направления камеры.", messageError);
+        }
+    }
+
+
+
+
+    private void updateCameraNames() {
+        cameraComboBox.getItems().clear();
+        for (int i = 0; i < cameraManager.getCameras().size(); i++) {
+            cameraComboBox.getItems().add(cameraManager.getCameras().get(i)); // Добавляем объект Camera
+        }
+
+        // Устанавливаем StringConverter для отображения названий камер
+        cameraComboBox.setConverter(new javafx.util.StringConverter<Camera>() {
+            @Override
+            public String toString(Camera camera) {
+                return "Camera " + (cameraManager.getCameras().indexOf(camera) + 1); // Возвращаем название камеры
+            }
+
+            @Override
+            public Camera fromString(String string) {
+                return null; // Не требуется для этого случая
+            }
+        });
+
+        cameraComboBox.getSelectionModel().select(cameraManager.getActiveCamera()); // Устанавливаем активную камеру по умолчанию
+    }
+
+
+    private void handleRemoveCamera() {
+        int currentIndex = cameraManager.getCameras().indexOf(cameraManager.getActiveCamera());
+        cameraManager.removeCamera(currentIndex);
+        System.out.println("Камера удалена. Текущая камера: " + cameraManager.getActiveCamera());
+    }
+
+    private void handleSwitchCamera() {
+        int selectedIndex = cameraComboBox.getSelectionModel().getSelectedIndex();
+        if (selectedIndex >= 0) {
+            cameraManager.setActiveCamera(selectedIndex);
+            System.out.println("Переключение на камеру: Camera " + (selectedIndex + 1));
+        }
+    }
+
+
+
     private void handleSelectTextureButtonClick() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg"));
@@ -140,8 +248,8 @@ public class GuiController {
     }
 
     private void rotateCamera(float angleY, float angleX) {
-        Vector3f cameraPosition = camera.getPosition();
-        Vector3f cameraTarget = camera.getTarget();
+        Vector3f cameraPosition = cameraManager.getActiveCamera().getPosition();
+        Vector3f cameraTarget = cameraManager.getActiveCamera().getTarget();
 
         Matrix4f rotationY = new Matrix4f();
         rotationY.rotY(angleY);
@@ -155,12 +263,12 @@ public class GuiController {
         rotationX.setRotation(new AxisAngle4f(right, angleX));
         rotationX.transform(cameraPosition);
 
-        camera.setPosition(cameraPosition);
+        cameraManager.getActiveCamera().setPosition(cameraPosition);
     }
 
     private void moveCamera(float dx, float dy, float dz) {
-        Vector3f cameraPosition = camera.getPosition();
-        Vector3f cameraTarget = camera.getTarget();
+        Vector3f cameraPosition = cameraManager.getActiveCamera().getPosition();
+        Vector3f cameraTarget = cameraManager.getActiveCamera().getTarget();
 
         Vector3f direction = new Vector3f(cameraTarget);
         direction.sub(cameraPosition);
@@ -181,8 +289,8 @@ public class GuiController {
         cameraPosition.add(movement);
         cameraTarget.add(movement);
 
-        camera.setPosition(cameraPosition);
-        camera.setTarget(cameraTarget);
+        cameraManager.getActiveCamera().setPosition(cameraPosition);
+        cameraManager.getActiveCamera().setTarget(cameraTarget);
     }
 
     private void setupMouseControls() {
@@ -214,8 +322,8 @@ public class GuiController {
             float angleY = (float) (deltaX * rotationSensitivity * 0.01);
             float angleX = (float) (deltaY * rotationSensitivity * 0.01);
 
-            Vector3f cameraPosition = camera.getPosition();
-            Vector3f cameraTarget = camera.getTarget();
+            Vector3f cameraPosition = cameraManager.getActiveCamera().getPosition();
+            Vector3f cameraTarget = cameraManager.getActiveCamera().getTarget();
 
             Matrix4f rotationY = new Matrix4f();
             rotationY.rotY(angleY);
@@ -229,7 +337,7 @@ public class GuiController {
             rotationX.setRotation(new AxisAngle4f(right, angleX));
             rotationX.transform(cameraPosition);
 
-            camera.setPosition(cameraPosition);
+            cameraManager.getActiveCamera().setPosition(cameraPosition);
 
             lastMouseXForModel = currentX;
             lastMouseYForModel = currentY;
@@ -247,7 +355,7 @@ public class GuiController {
     public void handleScroll(ScrollEvent event) {
         float zoom = (float) event.getDeltaY() * zoomSpeed;
         float modelSize = mesh != null ? 0.1f : 1f;
-        camera.zoom(zoom, modelSize);
+        cameraManager.getActiveCamera().zoom(zoom, modelSize);
     }
 
     @FXML

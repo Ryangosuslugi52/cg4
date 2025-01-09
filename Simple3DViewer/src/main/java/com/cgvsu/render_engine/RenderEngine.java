@@ -20,11 +20,12 @@ public class RenderEngine {
 
     public static void render(
             final GraphicsContext graphicsContext,
-            final Camera camera,
+            final CameraManager cameraManager,
             final Model mesh,
             final int width,
-            final int height)
-    {
+            final int height) {
+        Camera camera = cameraManager.getActiveCamera(); // Получаем активную камеру
+
         mesh.polygons = Triangulation.triangulate(mesh.polygons);
         NormalCalculator.calculateNormals(mesh);
         Matrix4f modelMatrix = rotateScaleTranslate();
