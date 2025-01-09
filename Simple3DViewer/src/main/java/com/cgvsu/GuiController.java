@@ -9,14 +9,15 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
 import javax.vecmath.AxisAngle4f;
 import javax.vecmath.Vector3f;
 import javax.vecmath.Matrix4f;
@@ -24,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class GuiController {
 
@@ -33,11 +35,25 @@ public class GuiController {
     @FXML
     private Canvas canvas;
 
-
     @FXML
-    private Button selectTextureButton; // Поле для кнопки выбора текстуры
+    private Button selectTextureButton;
+
+    private final Scene scene = new Scene();
 
     private Model mesh = null;
+
+    public TextField sx;
+    public TextField sy;
+    public TextField sz;
+    public TextField tx;
+    public TextField ty;
+    public TextField tz;
+    public TextField rx;
+    public TextField ry;
+    public TextField rz;
+    public Button convert;
+
+    Alert messageError = new Alert(Alert.AlertType.ERROR);
 
     private Camera camera = new Camera(
             new Vector3f(0, 0, 100),
@@ -87,17 +103,14 @@ public class GuiController {
         File file = fileChooser.showOpenDialog((Stage) canvas.getScene().getWindow());
         if (file != null) {
             String texturePath = file.getAbsolutePath();
-            // Предполагается, что у вас есть метод для установки текстуры модели
             if (mesh != null) {
-                mesh.pathTexture = texturePath; // Установка пути к текстуре в модели
+                mesh.pathTexture = texturePath;
                 System.out.println("Текстура установлена: " + texturePath);
             } else {
                 System.out.println("Модель не загружена.");
             }
         }
     }
-
-
 
     private void setupMouseControls() {
         canvas.setOnMousePressed(this::handleMousePress);
@@ -128,16 +141,13 @@ public class GuiController {
             float angleY = (float) (deltaX * rotationSensitivity * 0.01);
             float angleX = (float) (deltaY * rotationSensitivity * 0.01);
 
-            // Вместо вращения модели, вращаем камеру вокруг цели
             Vector3f cameraPosition = camera.getPosition();
             Vector3f cameraTarget = camera.getTarget();
 
-            // Вращение вокруг вертикальной оси (Y)
             Matrix4f rotationY = new Matrix4f();
             rotationY.rotY(angleY);
             rotationY.transform(cameraPosition);
 
-            // Вращение вокруг горизонтальной оси (X)
             Vector3f right = new Vector3f();
             right.cross(new Vector3f(0, 1, 0), new Vector3f(cameraTarget.x - cameraPosition.x, cameraTarget.y - cameraPosition.y, cameraTarget.z - cameraPosition.z));
             right.normalize();
@@ -183,9 +193,40 @@ public class GuiController {
         try {
             String fileContent = Files.readString(fileName);
             mesh = ObjReader.read(fileContent);
+            scene.addModel(mesh);
             // todo: обработка ошибок
         } catch (IOException exception) {
-            // Handle exception
+        }
+    }
+
+    private void showMessage(String headText, String messageText, Alert alert) {
+        alert.setHeaderText(headText);
+        alert.setContentText(messageText);
+        alert.showAndWait();
+    }
+
+    public void convert(MouseEvent mouseEvent) {
+        if (Objects.equals(tx.getText(), "") || Objects.equals(ty.getText(), "") || Objects.equals(tz.getText(), "")
+                || Objects.equals(sx.getText(), "") || Objects.equals(sy.getText(), "") || Objects.equals(sz.getText(), "")
+                || Objects.equals(rx.getText(), "") || Objects.equals(ry.getText(), "") || Objects.equals(rz.getText(), "")) {
+            showMessage("Ошибка", "Введите необходимые данные!", messageError);
+        } else {
+            try {
+                float txVal = Float.parseFloat(tx.getText());
+                float tyVal = Float.parseFloat(ty.getText());
+                float tzVal = Float.parseFloat(tz.getText());
+                float rxVal = Float.parseFloat(rx.getText());
+                float ryVal = Float.parseFloat(ry.getText());
+                float rzVal = Float.parseFloat(rz.getText());
+                float sxVal = Float.parseFloat(sx.getText());
+                float syVal = Float.parseFloat(sy.getText());
+                float szVal = Float.parseFloat(sz.getText());
+                scene.transformActiveModel(txVal, tyVal, tzVal, rxVal, ryVal, rzVal, sxVal, syVal, szVal);
+            } catch (NumberFormatException e) {
+                showMessage("Ошибка", "Неправильный формат чисел!", messageError);
+            } catch (RuntimeException ex) {
+                showMessage("Ошибка", ex.getMessage(), messageError);
+            }
         }
     }
 }
