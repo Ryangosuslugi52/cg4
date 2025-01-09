@@ -12,8 +12,6 @@ public class Camera {
     private float nearPlane;
     private float farPlane;
     private boolean isActive;
-    private float yaw = 0.0f;
-    private float pitch = 0.0f;
 
     public Camera(
             final Vector3f position,
@@ -37,10 +35,6 @@ public class Camera {
         this.position = position;
     }
 
-    public void setTarget(final Vector3f target) {
-        this.target = target;
-    }
-
     public void setAspectRatio(final float aspectRatio) {
         this.aspectRatio = aspectRatio;
     }
@@ -57,18 +51,6 @@ public class Camera {
         return target;
     }
 
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void movePosition(final Vector3f translation) {
-        this.position.add(translation);
-    }
-
-    public void moveTarget(final Vector3f translation) {
-        this.target.add(translation);
-    }
-
     Matrix4f getViewMatrix() {
         return GraphicConveyor.lookAt(position, target);
     }
@@ -78,11 +60,14 @@ public class Camera {
     }
 
     public void zoom(float amount, float modelSize) {
-        float zoomFactor = amount * (modelSize / 10f); // 10f - базовый коэффициент
+        float zoomFactor = amount * (modelSize / 10f);
         Vector3f toCamera = new Vector3f();
         toCamera.sub(position, target);
         toCamera.scale(1 - zoomFactor);
         position.add(target, toCamera);
     }
 
+    public void setTarget(Vector3f target) {
+        this.target = target;
+    }
 }

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import javafx.scene.input.KeyEvent;
 
 public class GuiController {
 
@@ -92,6 +93,9 @@ public class GuiController {
 
         setupMouseControls();
 
+        canvas.setOnKeyPressed(this::handleKeyPress);
+        canvas.setFocusTraversable(true);
+
         selectTextureButton.setOnAction(event -> handleSelectTextureButtonClick());
 
     }
@@ -110,6 +114,75 @@ public class GuiController {
                 System.out.println("Модель не загружена.");
             }
         }
+    }
+
+    private void handleKeyPress(KeyEvent event) {
+        switch (event.getCode()) {
+            case W:
+                rotateCamera(0, -rotationSensitivity);
+                break;
+            case S:
+                rotateCamera(0, rotationSensitivity);
+                break;
+            case A:
+                rotateCamera(-rotationSensitivity, 0);
+                break;
+            case D:
+                rotateCamera(rotationSensitivity, 0);
+                break;
+            case UP:
+                moveCamera(0, 0, -zoomSpeed);
+                break;
+            case DOWN:
+                moveCamera(0, 0, zoomSpeed);
+                break;
+        }
+    }
+
+    private void rotateCamera(float angleY, float angleX) {
+        Vector3f cameraPosition = camera.getPosition();
+        Vector3f cameraTarget = camera.getTarget();
+
+        Matrix4f rotationY = new Matrix4f();
+        rotationY.rotY(angleY);
+        rotationY.transform(cameraPosition);
+
+        Vector3f right = new Vector3f();
+        right.cross(new Vector3f(0, 1, 0), new Vector3f(cameraTarget.x - cameraPosition.x, cameraTarget.y - cameraPosition.y, cameraTarget.z - cameraPosition.z));
+        right.normalize();
+        Matrix4f rotationX = new Matrix4f();
+        rotationX.setIdentity();
+        rotationX.setRotation(new AxisAngle4f(right, angleX));
+        rotationX.transform(cameraPosition);
+
+        camera.setPosition(cameraPosition);
+    }
+
+    private void moveCamera(float dx, float dy, float dz) {
+        Vector3f cameraPosition = camera.getPosition();
+        Vector3f cameraTarget = camera.getTarget();
+
+        Vector3f direction = new Vector3f(cameraTarget);
+        direction.sub(cameraPosition);
+        direction.normalize();
+
+        Vector3f right = new Vector3f();
+        right.cross(direction, new Vector3f(0, 1, 0));
+        right.normalize();
+
+        Vector3f up = new Vector3f();
+        up.cross(right, direction);
+
+        Vector3f movement = new Vector3f();
+        movement.scaleAdd(dx, right, movement);
+        movement.scaleAdd(dy, up, movement);
+        movement.scaleAdd(dz, direction, movement);
+
+        cameraPosition.add(movement);
+        cameraTarget.add(movement);
+
+        camera.setPosition(cameraPosition);
+        camera.setTarget(cameraTarget);
     }
 
     private void setupMouseControls() {

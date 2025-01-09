@@ -27,22 +27,26 @@ public class Rasterization {
 
             for (int i = 0; i < 3; i++) {
                 int vertexIndex = polygon.getVertexIndices().get(i);
+
+                if (vertexIndex >= vertices.length || vertexIndex < 0) {
+                    System.err.println("Invalid vertex index: " + vertexIndex);
+                    continue;
+                }
+
                 coordX[i] = (int) vertices[vertexIndex][0];
                 coordY[i] = (int) vertices[vertexIndex][1];
                 deepZ[i] = vertices[vertexIndex][2];
                 colors[i] = vertexColors[vertexIndex];
             }
 
-            // Сортировка вершин по Y
             sort(coordX, coordY, deepZ, colors);
 
-            // Растеризация верхней части треугольника
             rasterizeTrianglePart(graphicsContext, coordX, coordY, deepZ, colors, zBuffer, 0, 1);
 
-            // Растеризация нижней части треугольника
             rasterizeTrianglePart(graphicsContext, coordX, coordY, deepZ, colors, zBuffer, 1, 2);
         }
     }
+
 
     private static void rasterizeTrianglePart(
             GraphicsContext graphicsContext,

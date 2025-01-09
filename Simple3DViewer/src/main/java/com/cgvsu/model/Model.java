@@ -2,7 +2,6 @@ package com.cgvsu.model;
 
 import com.cgvsu.math.Vector2f;
 import com.cgvsu.math.Vector3f;
-
 import com.cgvsu.normalize.NormalCalculator;
 import javafx.scene.paint.Color;
 
@@ -25,17 +24,6 @@ public class Model {
     private Vector3f translation = new Vector3f(0, 0, 0);
     private Vector3f rotation = new Vector3f(0, 0, 0);
     private Vector3f scale = new Vector3f(1, 1, 1);
-//    public ImageToText imageToText = null;
-
-//    public void triangulate() {
-//        polygonsWithoutTriangulation = polygons;
-//
-//        polygons = (ArrayList<Polygon>) Triangulation.triangulate(polygons);
-//    }
-
-//    public void normalize() {
-//        normals = (ArrayList<Vector3f>) Normalize.normale(vertices, polygons);
-//    }
 
     public void normalize() {
         try {

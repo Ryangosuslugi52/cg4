@@ -9,8 +9,8 @@ public class AffineTransformations {
         Matrix4f rotationMatrix = rotationMatrix(alpha, beta, gamma);
         Matrix4f scaleMatrix = scaleMatrix(sx, sy, sz);
         Matrix4f modelMatrix = new Matrix4f();
-        modelMatrix.mul(scaleMatrix, rotationMatrix);
-        modelMatrix.mul(transitionMatrix);
+        modelMatrix.mul(transitionMatrix, rotationMatrix);
+        modelMatrix.mul(scaleMatrix);
         return modelMatrix;
     }
 
@@ -27,10 +27,9 @@ public class AffineTransformations {
         Matrix4f Rx = rotationAroundAxisMatrix(alpha, AXIS.X);
         Matrix4f Ry = rotationAroundAxisMatrix(beta, AXIS.Y);
         Matrix4f Rz = rotationAroundAxisMatrix(gamma, AXIS.Z);
-        // Изменён порядок умножения для работы с векторами-столбцами
         Matrix4f rotationMatrix = new Matrix4f();
-        rotationMatrix.mul(Ry, Rx);
-        rotationMatrix.mul(Rz);
+        rotationMatrix.mul(Rz, Rx);
+        rotationMatrix.mul(Ry);
         return rotationMatrix;
     }
 
@@ -71,16 +70,16 @@ public class AffineTransformations {
         return translationMatrix;
     }
 
-    public static void transformVector(Vector4f vector, Matrix4f matrix) {        // Умножение вектора-столбца на матрицу
-        float x = vector.x * matrix.m00 + vector.y * matrix.m01 + vector.z * matrix.m02 + vector.w * matrix.m03;
-        float y = vector.x * matrix.m10 + vector.y * matrix.m11 + vector.z * matrix.m12 + vector.w * matrix.m13;
-        float z = vector.x * matrix.m20 + vector.y * matrix.m21 + vector.z * matrix.m22 + vector.w * matrix.m23;
-        float w = vector.x * matrix.m30 + vector.y * matrix.m31 + vector.z * matrix.m32 + vector.w * matrix.m33;
+    public static void transformVector(Vector4f vector, Matrix4f matrix) {
+        float x = vector.x * matrix.m00 + vector.y * matrix.m10 + vector.z * matrix.m20 + vector.w * matrix.m30;
+        float y = vector.x * matrix.m01 + vector.y * matrix.m11 + vector.z * matrix.m21 + vector.w * matrix.m31;
+        float z = vector.x * matrix.m02 + vector.y * matrix.m12 + vector.z * matrix.m22 + vector.w * matrix.m32;
+        float w = vector.x * matrix.m03 + vector.y * matrix.m13 + vector.z * matrix.m23 + vector.w * matrix.m33;
         vector.getClass();
     }
 
     public static Matrix4f worldMatrix(double tx, double ty, double tz, double alpha, double beta, double gamma,
-                                       double sx, double sy, double sz) {        // Метод для аффинных преобразований из локальных в мировые координаты
+                                       double sx, double sy, double sz) {
         Matrix4f translation = translationMatrix(tx, ty, tz);
         Matrix4f rotation = rotationMatrix(alpha, beta, gamma);
         Matrix4f scaling = scaleMatrix(sx, sy, sz);
